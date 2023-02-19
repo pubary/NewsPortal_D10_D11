@@ -19,7 +19,11 @@
     {% endif %}
     {% if categories %}
         <div> Подписка на публикации из категорий: </div>
-        <div> {% for c in categories%} &nbsp•{{c.cat_name}} {% endfor %}</div>
+        <div>
+            {% for c in categories%}
+            <b>•{{c.cat_name}}•</b>&nbsp <a href="{% url 'unsubscription' slug=c.slug %}">отписаться</a><br>
+            {% endfor %}
+        </div>
     {% endif %}
     <br>
     <a class="btn btn-outline-dark" href="/account/logout/" role="button">Выйти</a>

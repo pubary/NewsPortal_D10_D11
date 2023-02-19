@@ -143,6 +143,15 @@ def subscribe_me(request, slug):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
+@login_required
+def unsubscribe_me(request, slug):
+    user = request.user
+    category = Category.objects.get(slug=slug)
+    if Category.objects.filter(subscribers__username=user).exists():
+        category.subscribers.remove(user)
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
 def post_limit_spent_view(request):
     title = 'имя_подписчика',
     limit = DAY_POST_LIMIT
