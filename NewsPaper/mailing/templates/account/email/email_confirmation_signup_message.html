@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подтверждение регистрации</title>
+</head>
+<body>
+    {% load account %}
+    <center>
+        <h2>
+            <font color=#0C11B0>
+                <i>{{user.username |capfirst}} </i>, приветствуем Вас на нашем сайте, спасибо за регистрацию!
+            </font>
+        </h2>
+        <h4>
+            <font color=#082C52>
+                Перейдите, пожалуйста,
+                <b><a href="{{ activate_url }}"> по ссылке</a></b>
+                для активации вашего аккаунта.
+            </font>
+        </h4>
+    </center>
+</body>
+</html>

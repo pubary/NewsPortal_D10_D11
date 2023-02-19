@@ -1,0 +1,22 @@
+{% extends 'flatpages/default.html' %}
+
+{% block title %}
+    Ваше сообщение
+{% endblock title %}
+
+{% block content %}
+<div class="col-lg-12 text-center">
+<h1>{{ title }}Форма обратной связи</h1>
+<hr>
+<form action="{% url 'feedback_mail' %}" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label for="reader_name">Ваше имя</label>
+    <input type="text" name="reader_name"><br>
+    <label for="message">Напишите ваше сообщение для нас</label>
+    <input type="text" name="message"><br>
+<!--    <label for="date">Выберите дату начала подписки</label>-->
+<!--    <input type="date" name="date"><br>-->
+    <input type="submit" value="Отправить">
+</form>
+</div>
+{% endblock content %}

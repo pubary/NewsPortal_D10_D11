@@ -1,0 +1,29 @@
+{% extends 'flatpages/default.html' %}
+{% load custom_filters %}
+
+{% block title %}
+    {{ post.title |truncatechars:25 }}
+{% endblock title %}
+
+{% block content %}
+<div class="col-lg-12 text-center">
+    <h3>{{ post.title }}</h3>
+        {% for c in post.category.all %}
+            <a href="{% url 'category_show' slug=c.slug %}">{{ c.cat_name |capfirst }}</a>&nbsp&nbsp
+        {% endfor %}
+</div>
+<div class="col-lg-12 text-left">
+    <br>
+    {{ post.text|censor|linebreaks }}
+</div>
+<div class="col-lg-12 text-center">
+    {{ post.author.author_acc.first_name }}&nbsp{{ post.author.author_acc.last_name }}
+    <br>
+    {{ post.time|date:'d.m.Y H:i' }}
+    <hr>
+    <a href="{% url 'post_edit' pk=post.pk %}">Изменить</a>
+    &nbsp&nbsp
+    <a href="{% url 'post_delete' pk=post.pk %}">Удалить</a>
+</div>
+<br>
+{% endblock content %}

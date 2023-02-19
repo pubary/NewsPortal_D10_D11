@@ -1,0 +1,42 @@
+{% extends 'flatpages/default.html' %}
+{% load custom_filters %}
+
+{% block title %}
+    {{title}}
+{% endblock title %}
+
+{% block content %}
+<div class="col-lg-12 text-center">
+   <h1>{{title}}</h1>
+
+   <form action="" method="get">
+   {% for f in filterset.form %}
+        <div><label class="form-label" for="{{ f.id_for_label }}">{{f.label}}: </label>&nbsp{{ f }}</div>
+        <div class="form-error">{{ f.errors }}</div>
+   {% endfor %}
+   <input type="submit" name="do_search" value="Найти" />
+   <br><br>
+</div>
+
+{% if is_search %}
+   {% if posts %}
+       {% for post in posts %}
+          <div class="col-lg-12 text-center">
+              <h5><a href="{% url 'post_detail' pk=post.pk %}">{{ post.title|censor|truncatechars:63 }}</a></h5>
+          </div>
+          {{ post.text|truncatechars:128|censor }}<br>
+          <div class="col-lg-12 text-center">
+              {{ post.time|date:'d. m. Y г.' }}
+          </div>
+          <hr>
+       {% endfor %}
+       {% include 'flatpages/list_pages.html' %}
+   {% else %}
+       <div class="col-lg-12 text-center">
+          <h3>Публикаций нет!</h3>
+       </div>
+   {% endif %}
+
+{% endif %}
+<br><br>
+{% endblock content %}

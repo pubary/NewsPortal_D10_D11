@@ -1,0 +1,21 @@
+{% extends 'flatpages/default.html' %}
+{% load custom_tags %}
+
+{% block title %}
+     {% block head_title %}{% endblock head_title %}
+{% endblock title %}
+
+{% block body %}
+<div class="col-lg-12 text-center">
+    {% if not request.user.is_authenticated and 'signup' not in request.path%}
+        <a class="btn btn-dark" href="/sign/login/" role="button">Войти по логину</a>
+    {% endif %}
+    {% block content %}
+    {% endblock content %}
+</div>
+{% endblock body %}
+
+{% block extra_body %}
+{% endblock extra_body %}
+
+

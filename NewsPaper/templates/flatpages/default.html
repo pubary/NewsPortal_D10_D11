@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>{% block title %} {% endblock title %}</title>
+        <!-- Core theme CSS (includes Bootstrap)-->
+ 		{% load static %}
+        {% load custom_tags %}
+        <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
+        {% block textstyle %}
+        {% endblock textstyle %}
+        {% block script %}
+        {% endblock script %}
+
+
+    </head>
+    <body>
+        <!-- Responsive navbar-->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+            <div class="container">
+                <a class="navbar-brand" href="/">Начальная страница</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    {% if request.user.is_authenticated %}
+                        <ul class="navbar-nav ml-auto">
+                            <li class="nav-item active">
+                                <a class="nav-link" href="{% url 'feedback_mail' %}">Обратная связь</a>
+                            </li>
+                        </ul>
+                    {% endif %}
+                </div>
+                <a class="navbar-brand" href="{% url 'posts_page' %}">Все публикации</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse"
+                    data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item active">
+                            <a class="nav-link" href="{% url 'posts_page' %}NW">Новости</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'posts_page' %}AT">Статьи</a>
+                        </li>
+                        {% if 'posts' in request.path%}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Категории</a>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                        {% list_category as categories %}
+                                        {% for c in categories %}
+                                            <li><a class="dropdown-item" href="{% url 'category_show' slug=c.slug %}">{{ c.cat_name|capfirst }}</a></li>
+                                        {% endfor %}
+                                        {% if request.user.is_staff %}
+                                            <li><hr class="dropdown-divider" /></li>
+                                            <li><a class="dropdown-item" href="#">Добавить свою</a></li>
+                                        {% endif %}
+                                    </ul>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        {% if request.user.is_staff %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">VIP</a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" href="{% url 'feedback_answer_mail' %}">Вид ответа</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'signup_mail' %}">Вид подтверждения</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'mail_notify_new_post' %}">Вид оповещения</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'mail_weekly_notify_posts' %}">Вид еженедельника</a></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" href="/admin">Админка</a></li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'post_search' %}">Поиск
+                                <span class="sr-only">►</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Page content-->
+        <div class="container">
+            <div class="row">
+
+                {% block body %}
+                    {% block content %}
+                    {% endblock content %}
+                {% endblock body %}
+                {% block extra_body %}
+                {% endblock extra_body %}
+
+            </div>
+        </div>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    </body>
+</html>
+
+

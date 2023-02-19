@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Публикации за неделю</title>
+    </head>
+
+    <body>
+        <center>
+        <h3><font color=#0C11B0>
+                <i>{{ msg_data.subscriber_name |capfirst }}</i>
+                , спасибо за пользование нашим сайтом!
+            </font>
+        </h3>
+        </center>
+        <div>
+            <font color=#082C52>
+                Вы получили это сообщение потому, что по интересующим вас тематикам
+                на нашем сайте за прошедшую неделю вышли новые публикации: <br>
+                <table>
+                    {% for post in msg_data.posts %}
+                        <tr>
+                            <td><center><i>{{post.time |date:'d.m.Y' }}</i></center></td>
+                            <td><a href="http://127.0.0.1:8000{% url 'post_detail' pk=post.id %}">
+                            <b><i>"{{ post.title |capfirst }}"</i></b></a><br></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </font>
+        </div>
+    </body>
+</html>
+
+

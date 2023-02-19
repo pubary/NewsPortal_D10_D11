@@ -1,0 +1,116 @@
+#first start (create base)
+
+cd newspaper
+python manage.py shell
+from django.contrib.auth.models import User
+from django.db import models
+from django.db.models import *
+from news.models import *
+User.objects.create_user('username1')
+us1 = User.objects.get(username='username1')
+a1 = Author(author_acc=us1)
+a1.save()
+a1 = Author.objects.get(author_acc__username='username1')
+User.objects.create_user('username2')
+us2 = User.objects.get(username='username2')
+a2 = Author(author_acc=us2)
+a2.save()
+a2 = Author.objects.get(author_acc__username='username2')
+cat1 = Category(cat_name='мода', slug='moda')
+cat1.save()
+cat2 = Category(cat_name='спорт', slug='sport')
+cat2.save()
+cat3 = Category(cat_name='происшествия', slug='proisshestvija')
+cat3.save()
+cat4 = Category(cat_name='культура', slug='kultura')
+cat4.save()
+p1 = Post(author=a1, p_type=Post.article, title='заголовок статьи про моду', text='текст статьи про моду')
+p1.save()
+p2 = Post(author=a1, p_type=Post.article, title='заголовок статьи про культуру', text='текст статьи про культуру')
+p2.save()
+p3 = Post(author=a2, p_type=Post.news, title='заголовок новости про спорт и происшествия', text='текст новости про спорт и происшествия')
+p3.save()
+p4 = Post(author=a2, p_type=Post.news, title='заголовок новости про культуру и моду', text='текст новости про культуру и моду')
+p4.save()
+p1.category.add(cat1)
+p2.category.add(cat4)
+p3.category.add(cat2)
+p3.category.add(cat3)
+p4.category.add(cat1)
+p4.category.add(cat4)
+com1 = Comment(text='скверно...', post=p3, user=us1)
+com1.save()
+com2 = Comment(text='отлично!', post=p3, user=us1)
+com2.save()
+com3 = Comment(text='супер!', post=p1, user=us2)
+com3.save()
+com4 = Comment(text='ерунда', post=p2, user=us2)
+com4.save()
+p1.like()
+p1.like()
+p2.like()
+p3.like()
+p3.like()
+p3.like()
+com1.like()
+com2.like()
+com2.like()
+com3.like()
+com4.like()
+com4.like()
+a1.update_rating()
+a2.update_rating()
+first_a = Author.objects.all().order_by('-rating').first()
+first_us = first_a.author_acc
+first_us.username, first_a.rating
+first_p = Post.objects.all().order_by('-rating').first()
+first_p.time
+a_id = first_p.author_id
+best_post_aut = Author.objects.get(author_acc_id=a_id)
+best_post_us = best_post_aut.author_acc
+best_post_us.username
+first_p.rating
+first_p.title
+f'{first_p.text[0:20]}...'
+Comment.objects.filter(post=first_p).values('time', 'user', 'rating', 'text')
+
+
+
+#-====---next start--==========------
+
+cd newspaper
+python manage.py shell
+
+from django.contrib.auth.models import User
+from django.db import models
+from django.db.models import *
+from news.models import *
+us1 = User.objects.get(username='username1')
+a1 = Author.objects.get(author_acc__username='username1')
+us2 = User.objects.get(username='username2')
+a2 = Author.objects.get(author_acc__username='username2')
+p1 = Post.objects.get(title='заголовок статьи про моду')
+p2 = Post.objects.get(title='заголовок статьи про культуру')
+p3 = Post.objects.get(title='заголовок новости про спорт и происшествия')
+p4 = Post.objects.get(title='заголовок новости про культуру и моду')
+cat1 = Category.objects.get(cat_name='мода')
+cat2 = Category.objects.get(cat_name='спорт')
+cat3 = Category.objects.get(cat_name='происшествия')
+cat4 = Category.objects.get(cat_name='культура')
+com1 = Comment.objects.get(text='скверно...')
+com2 = Comment.objects.get(text='отлично!')
+com3 = Comment.objects.get(text='супер!')
+com4 = Comment.objects.get(text='ерунда')
+first_a = Author.objects.all().order_by('-rating').first()
+first_us = first_a.author_acc
+first_us.username, first_a.rating
+first_p = Post.objects.all().order_by('-rating').first()
+first_p.time
+a_id = first_p.author_id
+best_post_aut = Author.objects.get(author_acc_id=a_id)
+best_post_us = best_post_aut.author_acc
+best_post_us.username
+first_p.rating
+first_p.title
+f'{first_p.text[0:20]}...'
+Comment.objects.filter(post=first_p).values('time', 'user', 'rating', 'text')

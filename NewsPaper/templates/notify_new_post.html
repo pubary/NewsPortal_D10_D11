@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Уведомление о новой публикации</title>
+    </head>
+
+    <body>
+        <center>
+        <h3><font color=#0C11B0>
+                <i>{{ msg_data.subscriber_name |capfirst }}</i>
+                , спасибо за пользование нашим сайтом!
+            </font>
+        </h3>
+        <p>
+            <font color=#082C52>
+                Вы получили это сообщение, потому что<br>
+                <i>{{msg_data.new_post_time |date:'d.m.Y' }}</i>
+                у нас вышла <b> новая публикация </b><br>
+                с тематикой, на которую вы подписывались:<br>
+                <a href="http://127.0.0.1:8000{% url 'post_detail' pk=msg_data.new_post_pk %}">
+                    <b><i>"{{ msg_data.new_post_title |capfirst }}"</i></b></a><br>
+                <i>"{{ msg_data.new_post_text |capfirst |truncatechars:50 }}"</i><br>
+                автор <i>"{{ msg_data.author_first_name |capfirst }} {{ msg_data.author_last_name |capfirst}}"</i><br>
+            </font>
+        </p>
+        </center>
+    </body>
+</html>
+
+

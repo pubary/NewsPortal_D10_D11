@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Уведомление</title>
+    </head>
+
+    <body>
+        <center>
+        <h3><font color=#0C11B0><i>{{ mail.reader_name |capfirst }}</i> , спасибо за обратную связь!</font></h3>
+        <p><font color=#082C52>
+            Мы <b> получили </b> ваше сообщение: <br>
+            <i>"{{ mail.message |truncatechars:50 }}";</i>
+            <br>и предпримем всё необходимое и возможное с нашей стороны.
+            </font>
+        </p>
+        </center>
+    </body>
+</html>
+
+
