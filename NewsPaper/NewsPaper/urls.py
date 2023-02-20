@@ -14,12 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.views.decorators.cache import cache_page
 from django.urls import path, include
 from news.views import PostsList
 
 urlpatterns = [
     path('admin/', admin.site.urls, name='vip'),
-    path('posts/', PostsList.as_view(), name='posts_page'),
+    path('posts/', cache_page(60*1)(PostsList.as_view()), name='posts_page'),
     path('pages/', include('django.contrib.flatpages.urls')),
     path('posts/', include('news.urls')),
     path('', include('protect.urls')),
