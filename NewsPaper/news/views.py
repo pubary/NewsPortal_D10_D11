@@ -35,11 +35,15 @@ class PostsList(ListView):
         context = super().get_context_data(**kwargs)
         cat_slug = self.kwargs.get('slug')
         current_user = self.request.user
-        if current_user.is_authenticated:
-            context['is_limit_spent'] = is_limit_spent(current_user)
-
         if (Post.TP[0][0] in self.request.path) or (Post.TP[1][0] in self.request.path):
-            context['quantity'] = Post.objects.filter(p_type=self.kwargs['p_type']).count()
+            quantity = cache.get(f'quantity-{self.kwargs["p_type"]}', None)
+            if not quantity:
+                quantity = Post.objects.filter(p_type=self.kwargs['p_type']).count()
+                cache.set(f'quantity-{self.kwargs["p_type"]}', quantity, 60)
+            context['quantity'] = quantity
+            if current_user.is_authenticated:
+                if current_user.groups.filter(name='authors').exists():
+                    context['is_limit_spent'] = is_limit_spent(current_user)
 
         if Post.TP[0][0] in self.request.path:
             context['title'] = 'Статьи'
