@@ -32,6 +32,7 @@ def notify_new_post():
     msg_data['new_post_pk'] = new_post.id
     subscribers_name = set(new_post.category.values_list('subscribers__username', flat=True))
     t = 7
+    print(f'Поиск подписчиков новой публикации id{new_post.id}')
     for subscriber_name in subscribers_name:
         if subscriber_name == new_post.author.author_acc.username:
             break
@@ -39,6 +40,7 @@ def notify_new_post():
             msg_data['subscriber_name'] = subscriber_name
             subscriber_email = User.objects.get(username=subscriber_name).email
             if subscriber_email:
+                print(f'Проверка валидации почты {subscriber_email}')
                 if EmailAddress.objects.filter(email=subscriber_email).exists():
                     if EmailAddress.objects.get(email=subscriber_email).verified:
                         msg_data['subscriber_email'] = subscriber_email

@@ -10,7 +10,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 
 from .filters.filters import PostFilter
 from .forms import PostForm
-from .models import Post, Author, Category
+from .models import Post, Author, Category, Comment
 from .utilits import is_limit_spent, DAY_POST_LIMIT
 
 
@@ -62,11 +62,12 @@ class PostDetail(DetailView):
     template_name = 'new.html'
     context_object_name = 'post'
 
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     post = Post.objects.get(id=self.kwargs['pk'])
-    #     print('время пуб-ции:', post.time)
-    #     return context
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        post = Post.objects.get(id=self.kwargs['pk'])
+        comments = Comment.objects.filter(post=post)
+        context['comments'] = comments
+        return context
 
     def get_object(self, *args, **kwargs):
         obj = cache.get(f'post-{self.kwargs["pk"]}', None)

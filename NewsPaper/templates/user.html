@@ -15,6 +15,7 @@
     <br>
     <div>  e-mail: {{user.email}} </div><br>
     {% if is_author %}
+        Количество публикаций: {{ quantity }}<br>
         Рейтинг: {{ rating }}<br><br>
     {% endif %}
     {% if categories %}

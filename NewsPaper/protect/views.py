@@ -19,5 +19,6 @@ class UserAccountView(LoginRequiredMixin, TemplateView):
                 current_author = Author.objects.get(author_acc=self.request.user)
                 current_author.update_rating()
                 context['rating'] = current_author.rating
+                context['quantity'] = Post.objects.filter(author=current_author).count()
         return context
 

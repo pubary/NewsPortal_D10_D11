@@ -1,5 +1,6 @@
 {% extends 'flatpages/default.html' %}
 {% load custom_filters %}
+{% load custom_tags %}
 
 {% block title %}
     {{ post.title |truncatechars:25 }}
@@ -13,17 +14,52 @@
         {% endfor %}
 </div>
 <div class="col-lg-12 text-left">
-    <br>
+    <hr>
     {{ post.text|censor|linebreaks }}
 </div>
-<div class="col-lg-12 text-center">
-    {{ post.author.author_acc.first_name }}&nbsp{{ post.author.author_acc.last_name }}
-    <br>
+<center>
+    <i> •&nbsp
     {{ post.time|date:'d.m.Y H:i' }}
-    <hr>
+    &nbsp &nbsp
+    {{ post.author.author_acc.first_name }}&nbsp{{ post.author.author_acc.last_name }}
+    </i> &nbsp • &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
+    <a class="btn btn-outline-danger" href="" role="button"> + </a>
+    &nbsp &nbsp
+    <a class="btn btn-outline-primary" href="" role="button"> - </a>
+    &nbsp &nbsp &nbsp
+    <b>{{ post.rating }}</b>
+    <br>
     <a href="{% url 'post_edit' pk=post.pk %}">Изменить</a>
     &nbsp&nbsp
     <a href="{% url 'post_delete' pk=post.pk %}">Удалить</a>
+    <hr>
+</center>
+{% if comments %}
+    {% for comment in comments %}
+        <div>
+            &nbsp &nbsp
+            {{ comment.text }}
+            <br>
+            <i> &nbsp &nbsp • &nbsp
+            {{ comment.time |date:'d.m.Y H:i' }}
+            &nbsp &nbsp
+            {{ comment.user.username }}
+            </i> &nbsp • &nbsp &nbsp &nbsp
+            <a class="btn btn-outline-danger" href="" role="button"> + </a>
+            &nbsp &nbsp
+            <a class="btn btn-outline-primary" href="" role="button"> - </a>
+            &nbsp &nbsp
+            <b>{{ comment.rating }}</b>
+        </div>
+    {% endfor %}
+{% endif %}
+<div>
+    <br>
+    <form action="" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="comment">Ваш комментарий &nbsp </label>
+        <input type="text" name="comment"> &nbsp
+        <input type="submit" value="Отправить">
+    </form>
 </div>
-<br>
 {% endblock content %}
