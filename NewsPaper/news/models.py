@@ -126,8 +126,22 @@ class Post(models.Model):
         return reverse('post_detail', args=[str(self.id)])
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+        creating = not bool(self.pk)
+        if creating:
+            cache.delete(f'quantity-posts')
+            cache.delete(f'quantity-{self.p_type}')
         cache.delete(f'post-{self.pk}')
+        for cats in self.category.all():
+            cache.delete(f'quantity-{cats.cat_slug}')
+        super().save(*args, **kwargs)
+
+    def delete(self, using=None, keep_parents=False):
+        if self.pk:
+            cache.delete(f'quantity-{self.p_type}')
+            cache.delete(f'quantity-posts')
+            for cats in self.category.all():
+               cache.delete(f'quantity-{cats.cat_slug}')
+        super().delete()
 
     class Meta:
         verbose_name = 'Публикация'

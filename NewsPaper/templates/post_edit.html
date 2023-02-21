@@ -5,7 +5,7 @@
 {% endblock title %}
 
 {% block content %}
-{% if request.user.username == post.author.author_acc.username %}
+{% if request.user.username == post.author.author_acc.username or create %}
     <div class="col-lg-12 text-center">
     <h1>{{ title }}</h1>
     <hr>

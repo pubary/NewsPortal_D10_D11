@@ -23,8 +23,9 @@ class PostsList(ListView):
 
     def get_queryset(self):
         cat_slug = self.kwargs.get('slug')
+        p_type = self.kwargs.get('p_type')
         if ('AT' in self.request.path) or ('NW' in self.request.path):
-            context = Post.objects.filter(p_type=self.kwargs['p_type'])
+            context = Post.objects.filter(p_type=p_type)
         elif cat_slug:
             context = Post.objects.filter(category__slug=cat_slug)
         else:
@@ -33,31 +34,38 @@ class PostsList(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        cat_slug = self.kwargs.get('slug')
         current_user = self.request.user
-        if (Post.TP[0][0] in self.request.path) or (Post.TP[1][0] in self.request.path):
-            quantity = cache.get(f'quantity-{self.kwargs["p_type"]}', None)
+        cat_slug = self.kwargs.get('slug')
+        p_type = self.kwargs.get('p_type')
+        if p_type:
+            context['post_type'] = p_type
+            if p_type == Post.TP[0][0]:
+                context['title'] = 'Статьи'
+            elif p_type == Post.TP[1][0]:
+                context['title'] = 'Новости'
+            quantity = cache.get(f'quantity-{p_type}', None)
             if not quantity:
-                quantity = Post.objects.filter(p_type=self.kwargs['p_type']).count()
-                cache.set(f'quantity-{self.kwargs["p_type"]}', quantity, 60)
+                quantity = Post.objects.filter(p_type=p_type).count()
+                cache.set(f'quantity-{p_type}', quantity, 60*60*12)
             context['quantity'] = quantity
             if current_user.is_authenticated:
                 if current_user.groups.filter(name='authors').exists():
                     context['is_limit_spent'] = is_limit_spent(current_user)
-
-        if Post.TP[0][0] in self.request.path:
-            context['title'] = 'Статьи'
-            context['post_type'] = Post.TP[0][0]
-        elif Post.TP[1][0] in self.request.path:
-            context['title'] = 'Новости'
-            context['post_type'] = Post.TP[1][0]
         elif cat_slug:
             cat_name = Category.objects.get(slug=cat_slug)
             context['category'] = cat_name
-            context['quantity'] = Post.objects.filter(category__slug=cat_slug).count()
+            quantity = cache.get(f'quantity-{cat_slug}', None)
+            if not quantity:
+                quantity = Post.objects.filter(category__slug=cat_slug).count()
+                cache.set(f'quantity-{cat_slug}', quantity, 60*60*12)
+            context['quantity'] = quantity
         else:
             context['title'] = 'Все публикации'
-            context['quantity'] = Post.objects.all().count()
+            quantity = cache.get(f'quantity-posts', None)
+            if not quantity:
+                quantity = Post.objects.all().count()
+                cache.set(f'quantity-posts', quantity, 60*60*12)
+            context['quantity'] = quantity
         return context
 
 
@@ -109,24 +117,22 @@ class PostCreate(PermissionRequiredMixin, CreateView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['create'] = 'True'
         if Post.TP[0][0] in self.request.path:
             context['title'] = 'Добавить статью'
         elif Post.TP[1][0] in self.request.path:
             context['title'] = 'Добавить новость'
         return context
 
-    def form_valid(self, form):
+    def form_valid(self, form, **kwargs):
         if not is_limit_spent(self.request.user):
             post = form.save(commit=False)
-            if Post.TP[0][0] in self.request.path:
-                post.p_type = Post.TP[0][0]
-            elif Post.TP[1][0] in self.request.path:
-                post.p_type = Post.TP[1][0]
+            post.p_type = self.kwargs["p_type"]
             author = Author.objects.get(author_acc=self.request.user)
             post.author = author
             return super().form_valid(form)
         else:
-            return redirect('user_home')
+            return redirect('post_limit_spent')
 
 
 class PostEdit(PermissionRequiredMixin, UpdateView):
@@ -134,16 +140,20 @@ class PostEdit(PermissionRequiredMixin, UpdateView):
     form_class = PostForm
     model = Post
     template_name = 'post_edit.html'
-    extra_context = {'title': 'Редактировать публикацию'}
+    extra_context = {'title': 'Редактировать публикацию', }
 
 
-class PostDelete(PermissionRequiredMixin, DeleteView):
-    permission_required = ('news.delete_post', )
+class PostDelete(DeleteView):
+    # permission_required = ('news.delete_post', )
     model = Post
     template_name = 'post_delete.html'
     success_url = reverse_lazy('posts_page')
     extra_context = {'title': 'Удалить публикацию'}
 
+    # def form_valid(self, form, **kwargs):
+    #     p_type = self.object.p_type
+    #     cache.delete(f'quantity-{p_type}')
+    #     return super().form_valid(form)
 
 @login_required
 def subscribe_me(request, slug):
