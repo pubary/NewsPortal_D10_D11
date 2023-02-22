@@ -17,10 +17,11 @@ from django.contrib import admin
 from django.views.decorators.cache import cache_page
 from django.urls import path, include
 from news.views import PostsList
+from .settings import DEBUG
 
 urlpatterns = [
     path('admin/', admin.site.urls, name='vip'),
-    path('posts/', cache_page(60*1)(PostsList.as_view()), name='posts_page'),
+    path('posts/', cache_page(60*2, key_prefix='posts')(PostsList.as_view()), name='posts_page'),
     path('pages/', include('django.contrib.flatpages.urls')),
     path('posts/', include('news.urls')),
     path('', include('protect.urls')),
@@ -28,3 +29,7 @@ urlpatterns = [
     path('account/', include('allauth.urls')),
     path('mailing/', include('mailing.urls')),
 ]
+
+if DEBUG:
+    import debug_toolbar
+    urlpatterns = [path('debug_toolbar/', include('debug_toolbar.urls')),] + urlpatterns

@@ -43,18 +43,22 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'news.apps.NewsConfig',
     'django.contrib.sites',
     'django.contrib.flatpages',
-    'fpages',
     'django_filters',
-    'sign.apps.SignConfig',
-    'protect.apps.ProtectConfig',
+
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'debug_toolbar',
+    'fpages',
+
     'mailing.apps.MailingConfig',
+    'news.apps.NewsConfig',
+    'protect.apps.ProtectConfig',
+    'sign.apps.SignConfig',
+
 ]
 
 SITE_ID = 1
@@ -69,6 +73,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'NewsPaper.urls'
@@ -95,7 +100,6 @@ AUTHENTICATION_BACKENDS = [
     # `allauth` speci c authentication methods, such as login by e-mail
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
-
 
 
 WSGI_APPLICATION = 'NewsPaper.wsgi.application'
@@ -170,6 +174,12 @@ CACHES = {
     }
 }
 
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+#     }
+# }
+
 LOGIN_REDIRECT_URL = '/'
 
 LOGIN_URL = '/account/login/'
@@ -201,4 +211,6 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+INTERNAL_IPS = ['127.0.0.1', ]
 

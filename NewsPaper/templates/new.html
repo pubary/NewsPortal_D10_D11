@@ -8,14 +8,14 @@
 
 {% block content %}
 <div class="col-lg-12 text-center">
-    <h3>{{ post.title }}</h3>
+        <h3>{{ post.title |censor }}</h3>
         {% for c in post.category.all %}
             <a href="{% url 'category_show' slug=c.slug %}">{{ c.cat_name |capfirst }}</a>&nbsp&nbsp
         {% endfor %}
 </div>
 <div class="col-lg-12 text-left">
     <hr>
-    {{ post.text|censor|linebreaks }}
+        {{ post.text |censor| linebreaks }}
 </div>
 <center>
     <i> •&nbsp
@@ -29,9 +29,9 @@
     &nbsp &nbsp &nbsp
     <b>{{ post.rating }}</b>
     <br>
-    <a href="{% url 'post_edit' pk=post.pk %}">Изменить</a>
+    <a href="{% url 'post_edit' pk=post.id %}">Изменить</a>
     &nbsp&nbsp
-    <a href="{% url 'post_delete' pk=post.pk %}">Удалить</a>
+    <a href="{% url 'post_delete' pk=post.id %}">Удалить</a>
     <hr>
 </center>
 {% if comments %}

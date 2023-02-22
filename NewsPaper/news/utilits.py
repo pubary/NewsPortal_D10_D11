@@ -12,13 +12,17 @@ DAY_POST_LIMIT = 3
 
 def is_limit_spent(user):
     lim = DAY_POST_LIMIT
-    quantity = Post.objects.filter(author__author_acc=user).count()
+    posts = Post.objects.filter(author__author_acc=user)
+    quantity = posts.count()
     if quantity < lim:
         return False
     else:
-        time_post = Post.objects.filter(author__author_acc=user).order_by('-time').values_list('time', flat=True)[(lim-1):lim]
+        time_post = posts.order_by('-time').values_list('time', flat=True)[(lim-1):lim]
         dt = (time.time() - time_post[0].timestamp()) / 3600 / 24
-        return (dt < 1)
+        if dt > 1:
+            return False
+        else:
+            return lim
 
 
 def notify_new_post():
@@ -47,7 +51,4 @@ def notify_new_post():
                         print(t, ' Создание задачи уведомления для ', msg_data['subscriber_email'])
                         mail_notify_new_post.apply_async([msg_data], countdown=t)
                         t += 7
-
-
-
 

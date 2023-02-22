@@ -27,14 +27,13 @@ class PostsList(ListView):
         if ('AT' in self.request.path) or ('NW' in self.request.path):
             context = Post.objects.filter(p_type=p_type)
         elif cat_slug:
-            context = Post.objects.filter(category__slug=cat_slug)
+            context = Post.objects.filter(category__slug=cat_slug).prefetch_related('category')
         else:
             context = Post.objects.all()
         return context
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        current_user = self.request.user
         cat_slug = self.kwargs.get('slug')
         p_type = self.kwargs.get('p_type')
         if p_type:
@@ -48,12 +47,9 @@ class PostsList(ListView):
                 quantity = Post.objects.filter(p_type=p_type).count()
                 cache.set(f'quantity-{p_type}', quantity, 60*60*12)
             context['quantity'] = quantity
-            if current_user.is_authenticated:
-                if current_user.groups.filter(name='authors').exists():
-                    context['is_limit_spent'] = is_limit_spent(current_user)
         elif cat_slug:
-            cat_name = Category.objects.get(slug=cat_slug)
-            context['category'] = cat_name
+            context['cat_name'] = Category.objects.get(slug=cat_slug).cat_name
+            context['cat_slug'] = cat_slug
             quantity = cache.get(f'quantity-{cat_slug}', None)
             if not quantity:
                 quantity = Post.objects.filter(category__slug=cat_slug).count()
@@ -76,8 +72,11 @@ class PostDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        post = Post.objects.get(id=self.kwargs['pk'])
-        comments = Comment.objects.filter(post=post)
+        post_id = self.kwargs['pk']
+        comments = cache.get(f'com-to-id{post_id}', None)
+        if not comments:
+            comments = Comment.objects.filter(post_id=post_id).select_related('user')
+            cache.set(f'com-to-id{post_id}', comments)
         context['comments'] = comments
         return context
 
@@ -87,6 +86,7 @@ class PostDetail(DetailView):
             obj = super().get_object(queryset=self.queryset)
             cache.set(f'post-{self.kwargs["pk"]}', obj)
         return obj
+
 
 class PostSearch(ListView):
     model = Post
@@ -143,41 +143,31 @@ class PostEdit(PermissionRequiredMixin, UpdateView):
     extra_context = {'title': 'Редактировать публикацию', }
 
 
-class PostDelete(DeleteView):
-    # permission_required = ('news.delete_post', )
+class PostDelete(PermissionRequiredMixin, DeleteView):
+    permission_required = ('news.delete_post', )
     model = Post
     template_name = 'post_delete.html'
     success_url = reverse_lazy('posts_page')
     extra_context = {'title': 'Удалить публикацию'}
 
-    # def form_valid(self, form, **kwargs):
-    #     p_type = self.object.p_type
-    #     cache.delete(f'quantity-{p_type}')
-    #     return super().form_valid(form)
 
 @login_required
 def subscribe_me(request, slug):
     user = request.user
-    category = Category.objects.get(slug=slug)
-    categories = Category.objects.filter(subscribers__username=user)
-    if category not in categories:
-        category.subscribers.add(user)
+    cat = Category.objects.get(slug=slug)
+    cats = Category.objects.filter(subscribers__username=user)
+    if cat not in cats:
+        cat.subscribers.add(user)
     return redirect(request.META.get('HTTP_REFERER'))
 
 
 @login_required
 def unsubscribe_me(request, slug):
     user = request.user
-    category = Category.objects.get(slug=slug)
+    cat = Category.objects.get(slug=slug)
     if Category.objects.filter(subscribers__username=user).exists():
-        category.subscribers.remove(user)
+        cat.subscribers.remove(user)
     return redirect(request.META.get('HTTP_REFERER'))
-
-
-def post_limit_spent_view(request):
-    title = 'имя_подписчика',
-    limit = DAY_POST_LIMIT
-    return render(request, 'post_limit_spent.html', {'title': title, 'limit': limit})
 
 
 # function for test the view of the notification email
@@ -200,4 +190,3 @@ def mail_weekly_notify_posts_view(request):
     posts = Post.objects.filter(category__subscribers__username=user.username, time__gt=last_week).values('id', 'title', 'time')
     msg_data = {'subscriber_name': user.username, 'posts': posts}
     return render(request, 'weekly_notify_posts.html', {'msg_data': msg_data, })
-

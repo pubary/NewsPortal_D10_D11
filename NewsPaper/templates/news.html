@@ -8,17 +8,13 @@
 
 {% block content %}
 <div class="col-lg-12 text-center">
-   <h1>{{title}}{{category.cat_name |capfirst}}</h1>
+   <h1>{{title}}{{cat_name |capfirst}}</h1>
    <h5>На {% current_time '%d.%m.%Yг.' %} всего публикаций: <i>{{ quantity }}</i> </h5>
-   {% if category %}
-      <a href="{% url 'subscription' slug=category.slug %}">Подписаться на категорию</a>
+   {% if cat_name %}
+      <a href="{% url 'subscription' slug=cat_slug %}">Подписаться на категорию</a>
    {% endif %}
    {% if post_type %}
-      {% if is_limit_spent %}
-        <a href="{% url 'post_limit_spent' %}">Добавить свою</a>
-      {% else %}
         <a href="{% url 'post_create' p_type=post_type %}">Добавить свою</a>
-      {% endif %}
    {% endif %}
    <hr>
 </div>

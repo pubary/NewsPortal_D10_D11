@@ -126,21 +126,20 @@ class Post(models.Model):
         return reverse('post_detail', args=[str(self.id)])
 
     def save(self, *args, **kwargs):
-        creating = not bool(self.pk)
-        if creating:
+        is_exists = bool(self.pk)
+        result = super().save(*args, **kwargs)
+        if is_exists:
             cache.delete(f'quantity-posts')
             cache.delete(f'quantity-{self.p_type}')
-        cache.delete(f'post-{self.pk}')
-        for cats in self.category.all():
-            cache.delete(f'quantity-{cats.cat_slug}')
-        super().save(*args, **kwargs)
+        return result
 
     def delete(self, using=None, keep_parents=False):
         if self.pk:
             cache.delete(f'quantity-{self.p_type}')
+            cache.delete(f'com-to-id{self.pk}')
             cache.delete(f'quantity-posts')
-            for cats in self.category.all():
-               cache.delete(f'quantity-{cats.cat_slug}')
+            for cat in self.category.all().values_list('cat_name', flat=True):
+               cache.delete(f'quantity-{Category.objects.get(cat_name=cat).slug}')
         super().delete()
 
     class Meta:
@@ -185,3 +184,11 @@ class Subscription(models.Model):
 
 class CensorVoc(models.Model):
     word = models.CharField(max_length=63)
+
+    def save(self, *args, **kwargs):
+        cache.delete(f'cens_words')
+        result = super().save(*args, **kwargs)
+        return result
+
+
+

@@ -1,6 +1,7 @@
 from django import template
 from datetime import datetime
 from news.models import Category
+from news.utilits import is_limit_spent
 
 register = template.Library()
 
@@ -19,4 +20,10 @@ def url_replace(context, **kwargs):
 def list_category():
     cats = Category.objects.values('slug', 'cat_name')
     return cats
+
+@register.simple_tag()
+def check_limit_spent(username):
+    return is_limit_spent(username)
+
+
 

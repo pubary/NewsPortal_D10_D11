@@ -1,27 +1,39 @@
 {% extends 'flatpages/default.html' %}
+{% load custom_tags %}
 
 {% block title %}
 {{ title }}
 {% endblock title %}
 
 {% block content %}
-{% if request.user.username == post.author.author_acc.username or create %}
+{% check_limit_spent request.user as limit %}
+{% if create and limit %}
     <div class="col-lg-12 text-center">
-    <h1>{{ title }}</h1>
-    <hr>
-    <form action="" method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" value="Сохранить" />
-    </form>
+        <h2>Уведомление</h2>
+        <br>
+        <h5>Уважаемый <i>{{ request.user.username }}</i>! </h5><br>
+        Вы достигли лимита в <i><b>{{ limit }}</b></i>
+        публикаций в сутки.<br>
+        Пожалуйста, разместите вашу публикацию на нашем сайте позднее.<br>
+        Спасибо за понимание!
+    </div>
+{% elif not create and request.user != post.author.author_acc %}
+    <div class="col-lg-12 text-center">
+        <h1>Редакторование запрещено</h1>
+        <hr><br>
+        <h5>Вы не являетесь автором выбранной публикации, поэтому не можете изменять её</h5>
+        <br><br><br>
+        <a class="btn btn-outline-dark" href="../" role="button">Назад</a>
     </div>
 {% else %}
     <div class="col-lg-12 text-center">
-    <h1>Редакторование запрещено</h1>
-    <hr><br>
-    <h5>Вы не являетесь автором выбранной публикации, поэтому не можете изменять её</h5>
-    <br><br><br>
-    <a class="btn btn-outline-dark" href="../" role="button">Назад</a>
+        <h1>{{ title }}</h1>
+        <hr>
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Сохранить" />
+        </form>
     </div>
 {% endif %}
 {% endblock content %}
