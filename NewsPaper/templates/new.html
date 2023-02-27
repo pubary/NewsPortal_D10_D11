@@ -18,16 +18,16 @@
         {{ post.text |censor| linebreaks }}
 </div>
 <center>
-    <i> •&nbsp
-    {{ post.time|date:'d.m.Y H:i' }}
-    &nbsp &nbsp
-    {{ post.author.author_acc.first_name }}&nbsp{{ post.author.author_acc.last_name }}
-    </i> &nbsp • &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
-    <a class="btn btn-outline-danger" href="" role="button"> + </a>
-    &nbsp &nbsp
-    <a class="btn btn-outline-primary" href="" role="button"> - </a>
-    &nbsp &nbsp &nbsp
-    <b>{{ post.rating }}</b>
+    <form action="" method="get">
+        <i> •&nbsp
+        {{ post.time|date:'d.m.Y H:i' }}
+        &nbsp &nbsp
+        {{ post.author.author_acc.first_name }}&nbsp{{ post.author.author_acc.last_name }}
+        </i> &nbsp • &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
+        <input class="btn btn-outline-danger" type="submit" name="like" value="+" />
+        &nbsp <b>{{ post.rating }}</b> &nbsp
+        <input class="btn btn-outline-primary" type="submit" name="dislike" value="-" />
+    </form>
     <br>
     <a href="{% url 'post_edit' pk=post.id %}">Изменить</a>
     &nbsp&nbsp
@@ -39,27 +39,38 @@
         <div>
             &nbsp &nbsp
             {{ comment.text }}
-            <br>
-            <i> &nbsp &nbsp • &nbsp
-            {{ comment.time |date:'d.m.Y H:i' }}
-            &nbsp &nbsp
-            {{ comment.user.username }}
-            </i> &nbsp • &nbsp &nbsp &nbsp
-            <a class="btn btn-outline-danger" href="" role="button"> + </a>
-            &nbsp &nbsp
-            <a class="btn btn-outline-primary" href="" role="button"> - </a>
-            &nbsp &nbsp
-            <b>{{ comment.rating }}</b>
+            <form action="" method="get">
+                <i> &nbsp &nbsp • &nbsp
+                {{ comment.time |date:'d.m.Y H:i' }}
+                &nbsp &nbsp
+                {{ comment.user.username }}
+                </i> &nbsp • &nbsp &nbsp &nbsp
+                <input class="btn btn-outline-danger" type="submit" name="{{comment.pk}}" value="+" />
+                &nbsp <b>{{ comment.rating }}</b> &nbsp
+                <input class="btn btn-outline-primary" type="submit" name="{{comment.pk}}" value="-" />
+            </form>
         </div>
     {% endfor %}
 {% endif %}
-<div>
-    <br>
-    <form action="" method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <label for="comment">Ваш комментарий &nbsp </label>
-        <input type="text" name="comment"> &nbsp
-        <input type="submit" value="Отправить">
-    </form>
-</div>
+{% if request.user.is_authenticated %}
+    {% if request.user != post.author.author_acc %}
+        <div>
+            <br>
+            <form action="" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <label for="comment">Ваш комментарий &nbsp </label>
+                <input type="text" name="comment"> &nbsp
+                <input type="submit" value="Отправить">
+            </form>
+            <br>
+        </div>
+    {% endif %}
+{% else %}
+    <div>
+        <br>
+        Для того, чтобы оставить свой комментарий &nbsp
+        <a class="btn btn-outline-dark" href="{% url 'login' %}" role="button">войдите в аккаунт</a>
+        <br>
+    </div>
+{% endif %}
 {% endblock content %}

@@ -2,8 +2,10 @@ import time
 
 from allauth.account.models import EmailAddress
 from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.shortcuts import get_object_or_404
 
-from .models import Post
+from .models import Post, Comment
 from .tasks import mail_notify_new_post
 
 
@@ -51,4 +53,22 @@ def notify_new_post():
                         print(t, ' Создание задачи уведомления для ', msg_data['subscriber_email'])
                         mail_notify_new_post.apply_async([msg_data], countdown=t)
                         t += 7
+
+
+def like_dislike(request, kwargs):
+    post_id = kwargs["pk"]
+    key = list(dict(request.GET.lists()).keys())[0]
+    if key == 'like':
+        Post.like(Post.objects.get(id=post_id))
+        cache.delete(f'post-{post_id}')
+    elif key == 'dislike':
+        Post.dislike(Post.objects.get(id=post_id))
+        cache.delete(f'post-{post_id}')
+    elif key.isdigit():
+        if request.GET[key] == '+':
+            Comment.like(get_object_or_404(Comment, id=key))
+        elif request.GET[key] == '-':
+            Comment.dislike(get_object_or_404(Comment, id=key))
+        cache.delete(f'comments_to_post{post_id}')
+
 

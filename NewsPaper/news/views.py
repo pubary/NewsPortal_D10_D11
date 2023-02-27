@@ -4,14 +4,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import User
 from django.core.cache import cache
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from .filters.filters import PostFilter
 from .forms import PostForm
 from .models import Post, Author, Category, Comment
-from .utilits import is_limit_spent, DAY_POST_LIMIT
+from .utilits import is_limit_spent, like_dislike
 
 
 class PostsList(ListView):
@@ -73,10 +73,10 @@ class PostDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         post_id = self.kwargs['pk']
-        comments = cache.get(f'com-to-id{post_id}', None)
+        comments = cache.get(f'comments_to_post{post_id}', None)
         if not comments:
             comments = Comment.objects.filter(post_id=post_id).select_related('user')
-            cache.set(f'com-to-id{post_id}', comments)
+            cache.set(f'comments_to_post{post_id}', comments)
         context['comments'] = comments
         return context
 
@@ -87,6 +87,23 @@ class PostDetail(DetailView):
             cache.set(f'post-{self.kwargs["pk"]}', obj)
         return obj
 
+    def get(self, request, *args, **kwargs):
+        if self.request.GET:
+            # dummy like end dislike
+            like_dislike(self.request, self.kwargs)
+            return redirect(request.META.get('HTTP_REFERER'))
+        return super().get(self, request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        post_id = kwargs['pk']
+        post = get_object_or_404(Post, id=post_id)
+        text = request.POST['comment']
+        if self.request.user.is_authenticated and self.request.user != post.author.author_acc:
+            if len(text):
+                comment = Comment(text=text, post=post, user=self.request.user)
+                comment.save()
+                cache.delete(f'comments_to_post{post_id}')
+        return redirect(request.META.get('HTTP_REFERER'))
 
 class PostSearch(ListView):
     model = Post

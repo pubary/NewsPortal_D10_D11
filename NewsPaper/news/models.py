@@ -131,12 +131,13 @@ class Post(models.Model):
         if is_exists:
             cache.delete(f'quantity-posts')
             cache.delete(f'quantity-{self.p_type}')
+            cache.delete(f'post-{self.pk}')
         return result
 
     def delete(self, using=None, keep_parents=False):
         if self.pk:
             cache.delete(f'quantity-{self.p_type}')
-            cache.delete(f'com-to-id{self.pk}')
+            cache.delete(f'comments_to_post{self.pk}')
             cache.delete(f'quantity-posts')
             for cat in self.category.all().values_list('cat_name', flat=True):
                cache.delete(f'quantity-{Category.objects.get(cat_name=cat).slug}')
