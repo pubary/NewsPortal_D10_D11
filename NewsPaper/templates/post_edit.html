@@ -31,9 +31,22 @@
         <hr>
         <form action="" method="post">
             {% csrf_token %}
-            {{ form.as_p }}
+            <h4>{{ form.title.label }}</h4>
+            {{ form.title }}
+            <br><br>
+            <h4>{{ form.category.label }}</h4>
+            {% for checkbox in form.category %}
+                <i>{{ checkbox }} </i> &nbsp
+            {% endfor %}
+            <br>
+            {{ form.category.help_text }}
+            <br><br>
+            <h4>{{ form.text.label }}</h4>
+            {{ form.text }}
+            <br><br>
             <input type="submit" value="Сохранить" />
         </form>
+        <br>
     </div>
 {% endif %}
 {% endblock content %}

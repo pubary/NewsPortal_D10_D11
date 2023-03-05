@@ -56,19 +56,24 @@ def notify_new_post():
 
 
 def like_dislike(request, kwargs):
-    post_id = kwargs["pk"]
     key = list(dict(request.GET.lists()).keys())[0]
-    if key == 'like':
-        Post.like(Post.objects.get(id=post_id))
-        cache.delete(f'post-{post_id}')
-    elif key == 'dislike':
-        Post.dislike(Post.objects.get(id=post_id))
-        cache.delete(f'post-{post_id}')
+    post_id = kwargs['pk']
+    if key.isalpha():
+        post = get_object_or_404(Post, id=post_id)
+        if request.user != post.author.author_acc:
+            if key == 'like':
+                Post.like(post)
+                cache.delete(f'post-{post_id}')
+            elif key == 'dislike':
+                Post.dislike(post)
+                cache.delete(f'post-{post_id}')
     elif key.isdigit():
-        if request.GET[key] == '+':
-            Comment.like(get_object_or_404(Comment, id=key))
-        elif request.GET[key] == '-':
-            Comment.dislike(get_object_or_404(Comment, id=key))
-        cache.delete(f'comments_to_post{post_id}')
+        comment = get_object_or_404(Comment, id=key)
+        if request.user != comment.user:
+            if request.GET[key] == '+':
+                Comment.like(comment)
+            elif request.GET[key] == '-':
+                Comment.dislike(comment)
+            cache.delete(f'comments_to_post{post_id}')
 
 

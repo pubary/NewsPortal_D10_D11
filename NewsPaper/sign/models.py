@@ -22,17 +22,21 @@ class UserRegisterForm(UserCreationForm):
 
 
 class CommonRegisterForm(SignupForm):
+
+    email = forms.EmailField(
+        widget=forms.TextInput(attrs={'placeholder':'Адрес вашей электронной почты', 'class': 'form-text'}),
+    )
     username = forms.CharField(
         label=('Логин'),
-        widget=forms.TextInput(attrs={"placeholder":('Логин'),}),
+        widget=forms.TextInput(attrs={'placeholder':'Логин', 'class': 'form-text'}),
     )
     first_name = forms.CharField(
         label=("Имя"),
-        widget=forms.TextInput(attrs={"placeholder":("Имя"),}),
+        widget=forms.TextInput(attrs={'placeholder': 'Имя', 'class': 'form-text'}),
     )
     last_name = forms.CharField(
         label=("Фамилия"),
-        widget=forms.TextInput(attrs={"placeholder":("Фамилия"),}),
+        widget=forms.TextInput(attrs={'placeholder': 'Фамилия', 'class': 'form-text'}),
     )
 
     def save(self, request):

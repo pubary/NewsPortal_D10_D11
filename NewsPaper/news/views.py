@@ -91,7 +91,7 @@ class PostDetail(DetailView):
         if self.request.GET:
             # dummy like end dislike
             like_dislike(self.request, self.kwargs)
-            return redirect(request.META.get('HTTP_REFERER'))
+            return redirect('post_detail', kwargs["pk"])
         return super().get(self, request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -103,7 +103,7 @@ class PostDetail(DetailView):
                 comment = Comment(text=text, post=post, user=self.request.user)
                 comment.save()
                 cache.delete(f'comments_to_post{post_id}')
-        return redirect(request.META.get('HTTP_REFERER'))
+        return redirect('post_detail', kwargs["pk"])
 
 class PostSearch(ListView):
     model = Post

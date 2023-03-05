@@ -9,8 +9,10 @@
 {% block content %}
 <div class="col-lg-12 text-center">
         <h3>{{ post.title |censor }}</h3>
-        {% for c in post.category.all %}
-            <a href="{% url 'category_show' slug=c.slug %}">{{ c.cat_name |capfirst }}</a>&nbsp&nbsp
+        {% for c in post.category.values %}
+            {% if c.slug %}
+                <a href="{% url 'category_show' slug=c.slug %}">{{ c.cat_name |capfirst }}</a>&nbsp&nbsp
+            {% endif %}
         {% endfor %}
 </div>
 <div class="col-lg-12 text-left">
@@ -58,8 +60,8 @@
             <br>
             <form action="" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                <label for="comment">Ваш комментарий &nbsp </label>
-                <input type="text" name="comment"> &nbsp
+                <label for="comment"><em> Ваш комментарий &nbsp </em></label>
+                <input type="text" class='form-control' name="comment"> &nbsp
                 <input type="submit" value="Отправить">
             </form>
             <br>
